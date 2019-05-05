@@ -107,8 +107,8 @@ var newMap = function(data) {
             .style("opacity", .9);
         tooltip.html("Period: " + d.properties.harvest + 
             "<br>Scenario: " + d.properties.scenario)
-            .style("left", (d3.event.pageX - 50) + "px")
-            .style("top", (d3.event.pageY - 50) + "px");
+            .style("left", (d3.event.pageX - $(window).width()/2) + "px")
+            .style("top", (d3.event.pageY - 40) + "px");
     })
     .on("mouseout", function(d) {
         d3.select(this).style("opacity", 1)
