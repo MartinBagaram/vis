@@ -1,6 +1,6 @@
-var height = 2*$(window).height()/3, width = $(window).width()/2;
+var height = 1*$(window).height()/2, width = $(window).width()/2;
 
-var margin = {top: 20, right: 80, bottom: 30, left: 50};
+var margin = {top: 30, right: 80, bottom: 50, left: 80};
 var projection = d3.geoMercator()
     .scale(400000)
     .center([-79.055235, 41.3289])  // centers map at given coordinates
@@ -95,6 +95,9 @@ dropDown.on("change", function() {
     checked = true;
     selected_scenario = d3.event.target.value;
     render(selected_scenario);
+    volumes.then(function(data) {
+        plotVolume(data);
+    });
     
 });
 
@@ -110,19 +113,20 @@ function filterData(data, scenario) {
 
 
 var newMap = function(data) {
-    subData = filterData(data.features, selected_scenario);
+    subData = data.features.filter(d => d.properties.scenario === selected_scenario);
     // console.log(subData);
+    g.selectAll("path")
+        .exit().remove();
+
     g.selectAll("path")
     .exit().remove()
     .data(subData)
     .enter()
-    // .filter(d => d.properties.scenario === selected_scenario)
     .append("path")
     .style("stroke", "#fff")
     .style("stroke-width", "1")
     .style("fill", d => color(d.properties.harvest))
     .attr("d", path)
-    // .attr("data-legend", d => d.properties.harvest)
     .on("mouseover", function(d) {
         d3.select(this).style("opacity", 0.6)
         tooltip.transition()
@@ -139,6 +143,118 @@ var newMap = function(data) {
         tooltip.transition()
             .duration(500)
             .style("opacity", 0);
-    })
-    // .exit().remove();
+    });
 }
+
+var volumes = d3.csv("./data/volume_final.csv")
+volumes.then(function(data) {
+    plotVolume(data);
+});
+
+var x = d3.scaleBand()
+    .range([0, width/2])
+    .padding(0.1);
+var y = d3.scaleLinear()
+    .range([height, 0]);
+
+var chart = d3.select("#chart")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", "translate(" + margin.left +
+            "," + margin.top + ")");
+
+var tooltipChart = d3.select("#chart").append("div") 
+    .attr("class", "tooltipChart")       
+    .style("opacity", 0);      
+    
+function plotVolume(data) {
+    // chart.selectAll("bar").exit().remove();
+    // Scale the range of the data in the domains
+    // subVolume = data.filter(d => d.scenario === selected_scenario);
+    chart.selectAll("rect")
+    .data(data.filter(d => d.scenario === selected_scenario))
+    .exit().remove();
+
+    x.domain(data.map(function(d) { return d.period; }));
+    y.domain([0, d3.max(data, function(d) { return d.value; })]);
+    
+            
+    chart.selectAll("rect")
+        // .exit().remove()
+        .data(data.filter(d => d.scenaros === selected_scenario))
+        .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.period))
+            .attr("y", d => y(d.value))
+            .attr("height", d => height - y(d.value))
+            .attr("width", x.bandwidth())
+            .on("mouseover", function(d) {
+                d3.select(this).style("opacity", 0.6)
+                tooltipChart.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltipChart.html(d3.format("(.2f")(d.value))
+                    .style("left", (d3.event.pageX ) + "px")
+                    .style("top", (d3.event.pageY + 10) + "px");
+            })
+            .on("mouseout", function(d) {
+                d3.select(this).style("opacity", 1)
+                tooltipChart.transition()
+                    .duration(50)
+                    .style("opacity", 0);
+            });
+  
+    chart.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+    
+    // add the y Axis
+    chart.append("g")
+        .call(d3.axisLeft(y));
+
+    // text on bars
+    // chart.selectAll("text")
+    //     .data(data.filter(d => d.scenario === selected_scenario))
+    //     // .attr("class", "bar")
+    //     .enter()
+    //     .append("text")
+    //     .text(d => d.value)
+    //     .attr("text-anchor", "middle")
+    //     .attr("x", function(d, i) {
+    //         console.log(i * x.bandwidth());
+    //         return i * x.bandwidth();
+    //     })
+    //     .attr("y", d => height/2 - y(d.value) + 10)
+    //     // .attr("dy", ".75em")
+    //     .attr("fill", "red");
+    // // .attr("fill", "blue");
+}
+
+// Title
+chart.append("text")
+    .text('Volume Harvested per Period')
+    .attr("text-anchor", "middle")
+    .attr("class", "graph-title")
+    .attr("y", -15)
+    .attr("x", width / 4.0);
+
+
+// text label for the x axis
+chart.append("text")             
+    .attr("transform",
+        "translate(" + (width/4) + " ," + 
+                        (height + margin.top + 10) + ")")
+    .style("text-anchor", "middle")
+    .text("Period");
+
+// text label for the y axis
+chart.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 10 - margin.left)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Volume cubic meters"); 
+
