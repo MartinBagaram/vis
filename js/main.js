@@ -68,18 +68,14 @@ var g = svg.append("g")
             .scaleExtent([1,100])
             .on("zoom", zoomHandler)
     );
-var selected_scenario = "1";
+
+    var selected_scenario = "1";
+var previousScenario = "0";
 
 var forest = d3.json("./data/harvests1.json")
 forest.then(function(data) {
-    newMap(data);
+    newMap(data, selected_scenario);
 });
-
-function render() {
-    forest.then(function(data) {
-        newMap(data);
-    });
-} 
 
 function zoomHandler() {
     var transform = d3.event.transform;
@@ -94,35 +90,39 @@ dropDown.on("change", function() {
         .property("checked", true);
     checked = true;
     selected_scenario = d3.event.target.value;
-    render(selected_scenario);
+    forest.then(function(data) {
+        newMap(data, selected_scenario);
+    });
     volumes.then(function(data) {
         plotVolume(data);
     });
     
 });
 
-function filterData(data, scenario) {
-    filter_data = [];
-    data.forEach(function(d) {
-        if (d.properties.scenario === scenario) {
-            filter_data.push(d);
-        }
-    })
-    return filter_data;
-}
+// function filterData(data, scenario) {
+//     filter_data = [];
+//     data.forEach(function(d) {
+//         if (d.properties.scenario === scenario) {
+//             filter_data.push(d);
+//         }
+//     })
+//     return filter_data;
+// }
 
 
-var newMap = function(data) {
+var newMap = function(data, selected_scenario) {
     subData = data.features.filter(d => d.properties.scenario === selected_scenario);
-    // console.log(subData);
-    g.selectAll("path")
-        .exit().remove();
+    // g.selectAll("path")
+    //     .data(subData)
+    //     .exit().remove();
 
-    g.selectAll("path")
-    .exit().remove()
-    .data(subData)
-    .enter()
+    console.log(selected_scenario, previousScenario)
+   var parcel =  g.selectAll("path")
+    // .exit().remove()
+    .data(subData);
+    parcel.enter()
     .append("path")
+    .merge(parcel)
     .style("stroke", "#fff")
     .style("stroke-width", "1")
     .style("fill", d => color(d.properties.harvest))
@@ -144,6 +144,8 @@ var newMap = function(data) {
             .duration(500)
             .style("opacity", 0);
     });
+    previousScenario = selected_scenario
+    parcel.exit().remove();
 }
 
 var volumes = d3.csv("./data/volume_final.csv")
