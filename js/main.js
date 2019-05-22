@@ -10,7 +10,7 @@ var path = d3.geoPath()
 
 var svg = d3.select("#map").append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height+50);
 
 var tooltip = d3.select("#map").append("div") 
     .attr("class", "tooltip")       
@@ -84,67 +84,37 @@ function zoomHandler() {
         + ")scale(" + transform.k + ")");
 }
 
-var dropDown = d3.select("#dropdown");
-dropDown.on("change", function() {
-    d3.select("#dropdown")
-        .property("checked", true);
-    checked = true;
-    selected_scenario = d3.event.target.value;
-    forest.then(function(data) {
-        newMap(data, selected_scenario);
-    });
-    volumes.then(function(data) {
-        plotVolume(data);
-    });
-    
-});
-
-// function filterData(data, scenario) {
-//     filter_data = [];
-//     data.forEach(function(d) {
-//         if (d.properties.scenario === scenario) {
-//             filter_data.push(d);
-//         }
-//     })
-//     return filter_data;
-// }
-
 
 var newMap = function(data, selected_scenario) {
     subData = data.features.filter(d => d.properties.scenario === selected_scenario);
-    // g.selectAll("path")
-    //     .data(subData)
-    //     .exit().remove();
 
-    console.log(selected_scenario, previousScenario)
    var parcel =  g.selectAll("path")
-    // .exit().remove()
-    .data(subData);
-    parcel.enter()
-    .append("path")
-    .merge(parcel)
-    .style("stroke", "#fff")
-    .style("stroke-width", "1")
-    .style("fill", d => color(d.properties.harvest))
-    .attr("d", path)
-    .on("mouseover", function(d) {
-        d3.select(this).style("opacity", 0.6)
-        tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html("Period: " + d.properties.harvest + 
-            "<br>Scenario: " + d.properties.scenario +
-            "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
-            .style("left", (d3.event.pageX - $(window).width()/2 - 50) + "px")
-            .style("top", (d3.event.pageY - 10) + "px");
-    })
-    .on("mouseout", function(d) {
-        d3.select(this).style("opacity", 1)
-        tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
-    });
-    previousScenario = selected_scenario
+        .data(subData);
+        parcel.enter()
+        .append("path")
+        .merge(parcel)
+        .style("stroke", "#fff")
+        .style("stroke-width", "1")
+        .style("fill", d => color(d.properties.harvest))
+        .attr("d", path)
+        .on("mouseover", function(d) {
+            d3.select(this).style("opacity", 0.6)
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html("Period: " + d.properties.harvest + 
+                "<br>Scenario: " + d.properties.scenario +
+                "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
+                .style("left", (d3.event.pageX - $(window).width()/2 - 50) + "px")
+                .style("top", (d3.event.pageY - 10) + "px");
+        })
+        .on("mouseout", function(d) {
+            d3.select(this).style("opacity", 1)
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
     parcel.exit().remove();
 }
 
@@ -156,6 +126,7 @@ volumes.then(function(data) {
 var x = d3.scaleBand()
     .range([0, width/2])
     .padding(0.1);
+
 var y = d3.scaleLinear()
     .range([height, 0]);
 
@@ -172,9 +143,6 @@ var tooltipChart = d3.select("#chart").append("div")
     .style("opacity", 0);      
     
 function plotVolume(data) {
-    // chart.selectAll("bar").exit().remove();
-    // Scale the range of the data in the domains
-    // subVolume = data.filter(d => d.scenario === selected_scenario);
     chart.selectAll("rect")
     .data(data.filter(d => d.scenario === selected_scenario))
     .exit().remove();
@@ -190,6 +158,7 @@ function plotVolume(data) {
             .attr("class", "bar")
             .attr("x", d => x(d.period))
             .attr("y", d => y(d.value))
+            .attr("fill", d => color(d.period))
             .attr("height", d => height - y(d.value))
             .attr("width", x.bandwidth())
             .on("mouseover", function(d) {
@@ -216,22 +185,6 @@ function plotVolume(data) {
     chart.append("g")
         .call(d3.axisLeft(y));
 
-    // text on bars
-    // chart.selectAll("text")
-    //     .data(data.filter(d => d.scenario === selected_scenario))
-    //     // .attr("class", "bar")
-    //     .enter()
-    //     .append("text")
-    //     .text(d => d.value)
-    //     .attr("text-anchor", "middle")
-    //     .attr("x", function(d, i) {
-    //         console.log(i * x.bandwidth());
-    //         return i * x.bandwidth();
-    //     })
-    //     .attr("y", d => height/2 - y(d.value) + 10)
-    //     // .attr("dy", ".75em")
-    //     .attr("fill", "red");
-    // // .attr("fill", "blue");
 }
 
 // Title
@@ -260,3 +213,148 @@ chart.append("text")
     .style("text-anchor", "middle")
     .text("Volume cubic meters"); 
 
+
+d3.selectAll('input[name="scenario_type"]').on("change", function() {
+    var type = d3.select('input[name="scenario_type"]:checked').node().value;
+    volumes.then(function(data) {
+        clearChart()
+        if (type === "allSenario") {
+            plotAllScenarios(data);
+        } else {
+            plotVolume(data);
+        }
+    });
+    var scen_type = d3.select("#scen_div");
+    scen_type.classed("hidden", !scen_type.classed("hidden"));
+    
+}); 
+
+//========================================================================
+// This is for the slider Step
+// using clamp here to avoid slider exceeding the range limits
+var range = [1, 449];
+var xScale = d3.scaleLinear()
+.domain(range)
+.range([0, width - margin.left - margin.right])
+.clamp(true);
+// array useful for step sliders
+var step = 64;
+var rangeValues = d3.range(range[0], range[1], step || 1).concat(range[1]);
+var sliderXAxis = d3.axisBottom(xScale).tickValues(rangeValues).tickFormat(function (d) {
+    return d;
+});
+var scen_data = [1, 65, 129, 193, 257,321, 385, 449]
+var sliderSimple = d3
+.sliderBottom()
+.min(d3.min(scen_data))
+.max(d3.max(scen_data))
+.width(width/2)
+.step(64)
+// .tickFormat(d3.format('.2%'))
+.tickValues(scen_data)
+.default(1)
+.on('onchange', val => {
+    selected_scenario = val.toString();
+    forest.then(function(data) {
+        newMap(data, selected_scenario);
+    });
+    volumes.then(function(data) {
+        plotVolume(data);
+    });
+});
+
+var gSimple = d3
+    .select('#slider-simple')
+    .append('svg')
+    .attr('width', 500)
+    .attr('height', 100)
+    .append('g')
+    .attr('transform', 'translate(30,30)');
+
+gSimple.call(sliderSimple);
+
+function plotAllScenarios(data) {
+    
+    x0 = d3.scaleBand()
+        .domain(data.map(d => d.period))
+        .rangeRound([0, width/2])
+        .paddingInner(0.1);
+
+    keys = scen_data.map(String);
+    grp = [1, 2, 3, 4, 5]
+    
+    x1 = d3.scaleBand()
+        .domain(keys)
+        .rangeRound([0, x0.bandwidth()])
+        .padding(0.05)
+    
+    y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+
+    colors = d3.scaleOrdinal()
+        .range(["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099",
+             "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", 
+             "#994499", "#22aa99"])
+    
+    var svg = d3.select("#chart svg");
+    chart.append("g")
+    .selectAll("g")
+    .data(data)
+    .join("g")
+        .attr("transform", d => `translate(${x0(d.period)},0)`)
+    .selectAll("rect")
+    .data(function(d) {
+       dt = grp.map(key => ({key:d.scenaros, val: d.value}));
+    //    dt = {key:d.scenaros, val:d.value};
+    //    console.log(dt);
+       return dt;
+    })
+    .join("rect")
+        .attr("class", "bar")
+      .attr("x", d => x1(d.key))
+      .attr("y", d => y(d.val))
+      .attr("width", x1.bandwidth())
+      .attr("height", d => height - y(d.val))
+      .attr("fill", d => colors(d.key))
+      .on("mouseover", function(d) {
+        d3.select(this).style("opacity", 0.6)
+        tooltipChart.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltipChart.html(d3.format("(.2f")(d.val))
+            .style("left", (d3.event.pageX ) + "px")
+            .style("top", (d3.event.pageY + 10) + "px");
+    })
+    .on("mouseout", function(d) {
+        d3.select(this).style("opacity", 1)
+        tooltipChart.transition()
+            .duration(50)
+            .style("opacity", 0);
+    });
+    // update x-axis
+    chart.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x0));
+    // add the y Axis
+    chart.append("g")
+        .call(d3.axisLeft(y));
+    
+}
+
+function clearChart() {
+    chart.selectAll("rect")
+    .transition()
+    .duration(1000)
+    .ease(d3.easeCircle)
+    .attr("x", 300)
+    .remove() ;
+    chart.selectAll("g").remove();
+}
+
+
+// .attr("x", d => x(d.period))
+// .attr("y", d => y(d.value))
+// .attr("fill", d => color(d.period))
+// .attr("height", d => height - y(d.value))
+// .attr("width", x.bandwidth())
+// .attr("transform", function(d, i) { return "translate(" + x1(i) + ",0)"; })
