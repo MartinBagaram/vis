@@ -298,6 +298,7 @@ function plotAllScenarios(data) {
     
     var svg = d3.select("#chart svg");
     chart.append("g")
+    .attr("opacity", 0)
     .selectAll("g")
     .data(data)
     .join("g")
@@ -331,6 +332,13 @@ function plotAllScenarios(data) {
             .duration(50)
             .style("opacity", 0);
     });
+
+    chart.selectAll("g").transition()
+        .duration(1500)
+        .ease(d3.easeLinear)
+        .delay(function(d,i){ return  500 + 1000 * i; })
+        .style("opacity","1");
+
     // update x-axis
     chart.append("g")
         .attr("transform", "translate(0," + height + ")")
@@ -362,7 +370,7 @@ function plotAllScenarios(data) {
         .style("text-anchor", "end")
         .text(function(d) {return d; });
 
-        legend.transition().duration(500).delay(function(d,i){ return 1300 + 100 * i; }).style("opacity","1");
+        legend.transition().duration(500).delay(function(d,i){ return  100 * i; }).style("opacity","1");
     
 }
 

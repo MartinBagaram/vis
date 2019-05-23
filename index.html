@@ -23,6 +23,9 @@
         <!-- <div class="row navbar"> -->
             <ul class="nav justify-content-end">
                 <li class="nav-item">
+                    <a class="nav-link" href="#exampleModalLong" data-toggle="modal">Help</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link active" href="#">Home</a>
                 </li>
                 <li class="nav-item">
@@ -38,17 +41,17 @@
         <!-- </div> -->
 
         <div class="row first_row">
-            <div class="col-md-6 col-lg-6 col-xl-6" id="chart">
+            <div class="col-md-12 col-lg-6 col-xl-6 " id="chart">
 
             </div>
-            <div class="col-md-6 col-lg-6 col-xl-6" id="map">
+            <div class="col-md-12 col-lg-6 col-xl-6" id="map">
             
             </div>
         </div>
 
 <!-- Second row -->
-        <div class="row">
-            <div class="col-md-6 col-lg-6 col-xl-6">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 col-xl-3">
                 <form id="all_single">
                     <input type="radio" name="scenario_type" value="allSenario"> All Scenarios</input>
                     <input type="radio" name="scenario_type" value="singleScen" checked> Single Scenario</input>
@@ -63,9 +66,9 @@
                 </form>
             </div>
 
-            <div class="col-md-6 col-lg-6 col-xl-6">
-            <!-- One of three columns -->
-            </div>
+            <!-- <div class="col-md-6 col-lg-6 col-xl-6">
+            One of three columns
+            </div> -->
         </div>
 
         <div class="row">
@@ -76,6 +79,32 @@
             <!-- One of three columns -->
             </div>
         </div>
+        <!-- Modal -->
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">What It Does</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              This is tool is designed to help understand what is stochatistc programming. It focusses on 
+              spatial explicit stochastic programming where the decision variables are binary. 
+              This tool tries to display the solution for a forest management planning under climate change uncertainty.
+              <p> Under climate change it is assumed that forest growth and yield will be different from the historical data.
+                  However, different climate change forcast lead to different results and therefore a particular attention is 
+                needed from forest managers in order to take the best decision that will remain optimal regardless of which 
+            future climate under consideration materializes in the next future </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+            </div>
+          </div>
+        </div>
+      </div>
     <!-- </div> -->
     <script type="text/javascript" src="./js/d3.legend.js"></script>
     <script type="text/javascript" src="./js/main.js"></script>
