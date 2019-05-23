@@ -334,10 +334,35 @@ function plotAllScenarios(data) {
     // update x-axis
     chart.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x0));
+        .call(d3.axisBottom(x0))
+            .attr("font-weight", "bold");
     // add the y Axis
     chart.append("g")
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+            .attr("font-weight", "bold");
+
+      //Legend
+    var legend = svg.selectAll(".legend")
+        .data(colors.domain().slice())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d,i) { return "translate(0," + i * 20 + ")"; })
+        .style("opacity","0");
+
+        legend.append("rect")
+        .attr("x", width/2+margin.left)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", function(d) { return colors(d); });
+
+        legend.append("text")
+        .attr("x", width/2 +margin.left-2)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) {return d; });
+
+        legend.transition().duration(500).delay(function(d,i){ return 1300 + 100 * i; }).style("opacity","1");
     
 }
 
@@ -349,6 +374,7 @@ function clearChart() {
     .attr("x", 300)
     .remove() ;
     chart.selectAll("g").remove();
+    d3.selectAll("#chart .legend").remove();
 }
 
 
