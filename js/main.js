@@ -3,7 +3,7 @@ var height = 1*$(window).height()/2, width = $(window).width()/2;
 var margin = {top: 30, right: 80, bottom: 50, left: 80};
 var projection = d3.geoMercator()
     .scale(400000)
-    .center([-79.055235, 41.3289])  // centers map at given coordinates
+    .center([-79.025235, 41.3299])  // centers map at given coordinates
     .translate([width / 2, height / 2])
 var path = d3.geoPath()
     .projection(projection);
@@ -114,8 +114,10 @@ var newMap = function(data, selected_scenario) {
                 .duration(500)
                 .style("opacity", 0);
         });
-
+    // toReturn = g.selectAll("path");
     parcel.exit().remove();
+    // console.log(toReturn);
+    // return toReturn;
 }
 
 var volumes = d3.csv("./data/volume_final.csv")
@@ -224,9 +226,16 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
             plotVolume(data);
         }
     });
+    forest.then(function(for_data) {
+        if (type === "allSenario") {
+            plotManyMaps(for_data);
+            console.log("I dont reach here");
+        } else {
+            newMap(for_data, selected_scenario);
+        }
+    });
     var scen_type = d3.select("#scen_div");
     scen_type.classed("hidden", !scen_type.classed("hidden"));
-    
 }); 
 
 //========================================================================
@@ -273,6 +282,8 @@ var gSimple = d3
 
 gSimple.call(sliderSimple);
 
+var keysScen = scen_data.map(String);
+
 function plotAllScenarios(data) {
     
     x0 = d3.scaleBand()
@@ -280,11 +291,10 @@ function plotAllScenarios(data) {
         .rangeRound([0, width/2])
         .paddingInner(0.1);
 
-    keys = scen_data.map(String);
     grp = [1, 2, 3, 4, 5]
     
     x1 = d3.scaleBand()
-        .domain(keys)
+        .domain(keysScen)
         .rangeRound([0, x0.bandwidth()])
         .padding(0.05)
     
@@ -292,9 +302,7 @@ function plotAllScenarios(data) {
 
 
     colors = d3.scaleOrdinal()
-        .range(["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099",
-             "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", 
-             "#994499", "#22aa99"])
+        .range(["gold", "blue", "green", "orange", "black", "grey", "darkgreen", "brown"])
     
     var svg = d3.select("#chart svg");
     chart.append("g")
@@ -385,10 +393,64 @@ function clearChart() {
     d3.selectAll("#chart .legend").remove();
 }
 
+// console.log(keysScen);
+function plotManyMaps(data) {
+    console.log("I am starting the many maps");
+    svg.remove();
+    console.log("I am starting after the many maps");
+    for (var i = 0; i < keysScen.length; i++) {
+        projection = d3.geoMercator()
+            .scale(200000)
+            .center([-78.975035, 41.3089])  // centers map at given coordinates
+            .translate([width / 2, height / 2])
+        path = d3.geoPath()
+            .projection(projection);
 
-// .attr("x", d => x(d.period))
-// .attr("y", d => y(d.value))
-// .attr("fill", d => color(d.period))
-// .attr("height", d => height - y(d.value))
-// .attr("width", x.bandwidth())
-// .attr("transform", function(d, i) { return "translate(" + x1(i) + ",0)"; })
+        subData = data.features.filter(d => d.properties.scenario ===  keysScen[i]);
+        smallWidth = width/4
+        smallHeight = 1.2*height/2
+        ggg = d3.select("#map")
+            .append("svg")
+            .attr("height", smallHeight)
+            .attr("width", smallWidth);
+        
+        ggg.style("left", (i%4 * smallWidth) - smallWidth +"px")
+            .style("top", Math.floor(i/4) * smallHeight + "px")
+            .style("position", "absolute");
+        gg = ggg.append("g")
+            // .attr('transform', 'translate(100, 100)')
+            .call(d3.zoom()
+            .scaleExtent([1,100])
+            .on("zoom", zoomHandler));
+
+        parcel = gg.selectAll("path")
+                .data(subData);
+                parcel.enter()
+                .append("path")
+                .merge(parcel)
+                .style("stroke", "#fff")
+                .style("stroke-width", "1")
+                .style("fill", d => color(d.properties.harvest))
+                .attr("d", path)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 0.6)
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html("Period: " + d.properties.harvest + 
+                        "<br>Scenario: " + d.properties.scenario +
+                        "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
+                        .style("left", (d3.event.pageX - $(window).width()/2 - 50) + "px")
+                        .style("top", (d3.event.pageY - 10) + "px");
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 1)
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+            // toReturn = g.selectAll("path");
+            gg.exit().remove();
+    }
+    
+}
