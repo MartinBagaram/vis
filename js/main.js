@@ -54,7 +54,7 @@ legend.append("rect")
             filterPeriod = d;
             activeFilterPeriod = true;
         }
-        newMap(data);
+        updatePeriodMap();
        
     });
 
@@ -82,6 +82,12 @@ var forest = d3.json("./data/harvests1.json")
 forest.then(function(data) {
     newMap(data, selected_scenario);
 });
+
+function updatePeriodMap() {
+    forest.then(function(data) {
+        newMap(data, selected_scenario);
+    })
+}
 
 function zoomHandler() {
     var transform = d3.event.transform;
