@@ -1,5 +1,5 @@
 var height = 1*$(window).height()/2, width = $(window).width()/2;
-var offset = 100;
+var offset = 350;
 var margin = {top: 30, right: 80, bottom: 50, left: 80};
 
 var projection = d3.geoMercator()
