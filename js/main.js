@@ -16,13 +16,12 @@ var tooltip = d3.select("#map").append("div")
     .attr("class", "tooltip")       
     .style("opacity", 0);
 
-// var color = d3.scaleOrdinal(d3.schemeCategory10);
+var filterPeriod = 0;
+var activeFilterPeriod = false;
+
 var color = d3.scaleOrdinal()
 	.domain([0, 1, 2, 3, 4, 5])
 	.range(d3.schemeCategory10)
-var dropdown_options = [{"text":"1"}, {"text":"65"}, {"text":"129"}, {"text":"193"},
-                        {"text":"257"}, {"text":"321"}, {"text":"385"}, {"text":"449"}];
-
 
 var legendText = ["0", "1", "2", "3", "4", "5"];
 var legend = d3.select("#map").append("svg")
@@ -41,7 +40,23 @@ var legend = d3.select("#map").append("svg")
 legend.append("rect")
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", color);
+    .style("fill", color)
+    .style("cursor", "pointer")
+    .on("click", function(d) {
+        if(d3.select(this).classed('clicked')) {
+            d3.select(this).classed('clicked', false);
+            d3.select(this).style('fill-opacity', 1);
+            activeFilterPeriod = false;
+            
+        } else {
+            d3.select(this).classed('clicked', true);
+            d3.select(this).style('fill-opacity', 0.6);
+            filterPeriod = d;
+            activeFilterPeriod = true;
+        }
+        newMap(data);
+       
+    });
 
 legend.append("text")
     .data(legendText)
@@ -60,8 +75,8 @@ var g = svg.append("g")
             .on("zoom", zoomHandler)
     );
 
-    var selected_scenario = "1";
-var previousScenario = "0";
+var selected_scenario = "1";
+
 
 var forest = d3.json("./data/harvests1.json")
 forest.then(function(data) {
@@ -75,6 +90,13 @@ function zoomHandler() {
         + ")scale(" + transform.k + ")");
 }
 
+// if (activeFilterPeriod) {
+            //     if (d.properties.harvest === filterPeriod) {
+            //         return color(d.properties.harvest);
+            //     } else {
+            //         return "#055055";
+            //     }
+            // } else {
 
 var newMap = function(data, selected_scenario) {
     subData = data.features.filter(d => d.properties.scenario === selected_scenario);
@@ -86,7 +108,18 @@ var newMap = function(data, selected_scenario) {
         .merge(parcel)
         .style("stroke", "#fff")
         .style("stroke-width", "1")
-        .style("fill", d => color(d.properties.harvest))
+        .style("fill", function(d) {
+            if (!activeFilterPeriod) {
+                return color(d.properties.harvest);
+            } else {
+                if (d.properties.harvest === filterPeriod) {
+                    return color(d.properties.harvest);
+                } else {
+                    return "grey";
+                }
+            }
+           
+        })
         .attr("d", path)
         .on("mouseover", function(d) {
             d3.select(this).style("opacity", 0.6)
