@@ -226,6 +226,7 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
         } else {
 
             newMap(for_data, selected_scenario);
+            d3.select("#map .legend").style("right", "250px");
         }
     });
     var scen_type = d3.select("#scen_div");
