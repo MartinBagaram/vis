@@ -31,7 +31,7 @@ var legend = d3.select("#map").append("svg")
     .attr("height", 200)
     .style("position", "absolute")
     .style("top", "50px")
-    .style("right", "50px")
+    .style("right", "250px")
     .selectAll("g")
     .data(color.domain().slice())
     .enter()
@@ -52,15 +52,6 @@ legend.append("text")
         if (d === "0") return "Do nothing";
         return "Period " + d;
     });
-
-// populate drop-down
-d3.select("#dropdown")
-    .selectAll("option")
-    .data(dropdown_options)
-    .enter()
-    .append("option")
-    .attr("value", function(option) { return option.text; })
-    .text(function(option) { return option.text; });
 
 
 var g = svg.append("g")
@@ -226,11 +217,14 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
             plotVolume(data);
         }
     });
+
     forest.then(function(for_data) {
+         var alMapClass = d3.selectAll("#map .multiple");
+         if (alMapClass) alMapClass.remove();
         if (type === "allSenario") {
             plotManyMaps(for_data);
-            console.log("I dont reach here");
         } else {
+
             newMap(for_data, selected_scenario);
         }
     });
@@ -254,23 +248,23 @@ var sliderXAxis = d3.axisBottom(xScale).tickValues(rangeValues).tickFormat(funct
 });
 var scen_data = [1, 65, 129, 193, 257,321, 385, 449]
 var sliderSimple = d3
-.sliderBottom()
-.min(d3.min(scen_data))
-.max(d3.max(scen_data))
-.width(width/2)
-.step(64)
-// .tickFormat(d3.format('.2%'))
-.tickValues(scen_data)
-.default(1)
-.on('onchange', val => {
-    selected_scenario = val.toString();
-    forest.then(function(data) {
-        newMap(data, selected_scenario);
+    .sliderBottom()
+    .min(d3.min(scen_data))
+    .max(d3.max(scen_data))
+    .width(width/2)
+    .step(64)
+    // .tickFormat(d3.format('.2%'))
+    .tickValues(scen_data)
+    .default(1)
+    .on('onchange', val => {
+        selected_scenario = val.toString();
+        forest.then(function(data) {
+            newMap(data, selected_scenario);
+        });
+        volumes.then(function(data) {
+            plotVolume(data);
+        });
     });
-    volumes.then(function(data) {
-        plotVolume(data);
-    });
-});
 
 var gSimple = d3
     .select('#slider-simple')
@@ -358,27 +352,27 @@ function plotAllScenarios(data) {
             .attr("font-weight", "bold");
 
       //Legend
-    var legend = svg.selectAll(".legend")
+    var legend2 = svg.selectAll(".legend")
         .data(colors.domain().slice())
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", function(d,i) { return "translate(0," + i * 20 + ")"; })
         .style("opacity","0");
 
-        legend.append("rect")
+        legend2.append("rect")
         .attr("x", width/2+margin.left)
         .attr("width", 18)
         .attr("height", 18)
         .style("fill", function(d) { return colors(d); });
 
-        legend.append("text")
+        legend2.append("text")
         .attr("x", width/2 +margin.left-2)
         .attr("y", 9)
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(function(d) {return d; });
 
-        legend.transition().duration(500).delay(function(d,i){ return  100 * i; }).style("opacity","1");
+        legend2.transition().duration(500).delay(function(d,i){ return  100 * i; }).style("opacity","1");
     
 }
 
@@ -391,20 +385,21 @@ function clearChart() {
     .remove() ;
     chart.selectAll("g").remove();
     d3.selectAll("#chart .legend").remove();
+    d3.selectAll("#map path").remove();
 }
 
 // console.log(keysScen);
 function plotManyMaps(data) {
     console.log("I am starting the many maps");
-    svg.remove();
+    // svg.remove();
     console.log("I am starting after the many maps");
     for (var i = 0; i < keysScen.length; i++) {
-        projection = d3.geoMercator()
+        projection2 = d3.geoMercator()
             .scale(200000)
             .center([-78.975035, 41.3089])  // centers map at given coordinates
             .translate([width / 2, height / 2])
-        path = d3.geoPath()
-            .projection(projection);
+        path2 = d3.geoPath()
+            .projection(projection2);
 
         subData = data.features.filter(d => d.properties.scenario ===  keysScen[i]);
         smallWidth = width/4
@@ -412,7 +407,8 @@ function plotManyMaps(data) {
         ggg = d3.select("#map")
             .append("svg")
             .attr("height", smallHeight)
-            .attr("width", smallWidth);
+            .attr("width", smallWidth)
+            .attr("class", "multiple");
         
         ggg.style("left", (i%4 * smallWidth) - smallWidth +"px")
             .style("top", Math.floor(i/4) * smallHeight + "px")
@@ -431,7 +427,7 @@ function plotManyMaps(data) {
                 .style("stroke", "#fff")
                 .style("stroke-width", "1")
                 .style("fill", d => color(d.properties.harvest))
-                .attr("d", path)
+                .attr("d", path2)
                 .on("mouseover", function(d) {
                     d3.select(this).style("opacity", 0.6)
                     tooltip.transition()
@@ -449,7 +445,7 @@ function plotManyMaps(data) {
                         .duration(500)
                         .style("opacity", 0);
                 });
-            // toReturn = g.selectAll("path");
+            d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
             gg.exit().remove();
     }
     
