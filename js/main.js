@@ -1,10 +1,12 @@
 var height = 1*$(window).height()/2, width = $(window).width()/2;
-
+var offset = 100;
 var margin = {top: 30, right: 80, bottom: 50, left: 80};
+
 var projection = d3.geoMercator()
     .scale(400000)
     .center([-79.025235, 41.3299])  // centers map at given coordinates
-    .translate([width / 2, height / 2])
+    .translate([offset + width / 2, height / 2])
+
 var path = d3.geoPath()
     .projection(projection);
 
@@ -135,7 +137,7 @@ var newMap = function(data, selected_scenario) {
             tooltip.html("Period: " + d.properties.harvest + 
                 "<br>Scenario: " + d.properties.scenario +
                 "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
-                .style("left", (d3.event.pageX - $(window).width()/2 - 50) + "px")
+                .style("left", (d3.event.pageX - $(window).width()/2 + offset+margin.left) + "px")
                 .style("top", (d3.event.pageY - 10) + "px");
         })
         .on("mouseout", function(d) {
@@ -144,10 +146,7 @@ var newMap = function(data, selected_scenario) {
                 .duration(500)
                 .style("opacity", 0);
         });
-    // toReturn = g.selectAll("path");
     parcel.exit().remove();
-    // console.log(toReturn);
-    // return toReturn;
 }
 
 var volumes = d3.csv("./data/volume_final.csv")
@@ -199,8 +198,8 @@ function plotVolume(data) {
                     .duration(200)
                     .style("opacity", .9);
                 tooltipChart.html(d3.format("(.2f")(d.value))
-                    .style("left", (d3.event.pageX ) + "px")
-                    .style("top", (d3.event.pageY + 10) + "px");
+                    .style("left", (d3.event.pageX - margin.left) + "px")
+                    .style("top", (3*height/4) + "px");
             })
             .on("mouseout", function(d) {
                 d3.select(this).style("opacity", 1)
@@ -277,9 +276,9 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
 // using clamp here to avoid slider exceeding the range limits
 var range = [1, 449];
 var xScale = d3.scaleLinear()
-.domain(range)
-.range([0, width - margin.left - margin.right])
-.clamp(true);
+    .domain(range)
+    .range([0, width - margin.left - margin.right])
+    .clamp(true);
 // array useful for step sliders
 var step = 64;
 var rangeValues = d3.range(range[0], range[1], step || 1).concat(range[1]);
@@ -348,8 +347,6 @@ function plotAllScenarios(data) {
     .selectAll("rect")
     .data(function(d) {
        dt = grp.map(key => ({key:d.scenaros, val: d.value}));
-    //    dt = {key:d.scenaros, val:d.value};
-    //    console.log(dt);
        return dt;
     })
     .join("rect")
@@ -365,7 +362,7 @@ function plotAllScenarios(data) {
             .duration(200)
             .style("opacity", .9);
         tooltipChart.html(d3.format("(.2f")(d.val))
-            .style("left", (d3.event.pageX ) + "px")
+            .style("left", (d3.event.pageX - margin.left) + "px")
             .style("top", (d3.event.pageY + 10) + "px");
     })
     .on("mouseout", function(d) {
@@ -430,13 +427,10 @@ function clearChart() {
 
 // console.log(keysScen);
 function plotManyMaps(data) {
-    console.log("I am starting the many maps");
-    // svg.remove();
-    console.log("I am starting after the many maps");
     for (var i = 0; i < keysScen.length; i++) {
         projection2 = d3.geoMercator()
             .scale(200000)
-            .center([-78.975035, 41.3089])  // centers map at given coordinates
+            .center([-78.975035, 41.315089])  // centers map at given coordinates
             .translate([width / 2, height / 2])
         path2 = d3.geoPath()
             .projection(projection2);
@@ -450,11 +444,10 @@ function plotManyMaps(data) {
             .attr("width", smallWidth)
             .attr("class", "multiple");
         
-        ggg.style("left", (i%4 * smallWidth) - smallWidth +"px")
+        ggg.style("left", (i%4 * smallWidth) + 20 +"px")
             .style("top", Math.floor(i/4) * smallHeight + "px")
             .style("position", "absolute");
         gg = ggg.append("g")
-            // .attr('transform', 'translate(100, 100)')
             .call(d3.zoom()
             .scaleExtent([1,100])
             .on("zoom", zoomHandler));
@@ -476,7 +469,7 @@ function plotManyMaps(data) {
                     tooltip.html("Period: " + d.properties.harvest + 
                         "<br>Scenario: " + d.properties.scenario +
                         "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
-                        .style("left", (d3.event.pageX - $(window).width()/2 - 50) + "px")
+                        .style("left", (d3.event.pageX - $(window).width()/2 + offset + margin.left) + "px")
                         .style("top", (d3.event.pageY - 10) + "px");
                 })
                 .on("mouseout", function(d) {
