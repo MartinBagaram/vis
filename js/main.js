@@ -56,7 +56,14 @@ legend.append("rect")
             filterPeriod = d;
             activeFilterPeriod = true;
         }
-        updatePeriodMap();
+        type = d3.select('input[name="scenario_type"]:checked').node().value;
+        console.log(type);
+        if (type === "allSenario") {
+            plotAllMapsPeriod();
+        } else {
+            updatePeriodMap();
+        }
+        
        
     });
 
@@ -98,13 +105,6 @@ function zoomHandler() {
         + ")scale(" + transform.k + ")");
 }
 
-// if (activeFilterPeriod) {
-            //     if (d.properties.harvest === filterPeriod) {
-            //         return color(d.properties.harvest);
-            //     } else {
-            //         return "#055055";
-            //     }
-            // } else {
 
 var newMap = function(data, selected_scenario) {
     subData = data.features.filter(d => d.properties.scenario === selected_scenario);
@@ -271,6 +271,11 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
     scen_type.classed("hidden", !scen_type.classed("hidden"));
 }); 
 
+function plotAllMapsPeriod() {
+    forest.then(function(data) {
+        plotManyMaps(data);
+    });
+}
 //========================================================================
 // This is for the slider Step
 // using clamp here to avoid slider exceeding the range limits
@@ -459,7 +464,18 @@ function plotManyMaps(data) {
                 .merge(parcel)
                 .style("stroke", "#fff")
                 .style("stroke-width", "1")
-                .style("fill", d => color(d.properties.harvest))
+                .style("fill",  function(d) {
+                    if (!activeFilterPeriod) {
+                        return color(d.properties.harvest);
+                    } else {
+                        if (d.properties.harvest === filterPeriod) {
+                            return color(d.properties.harvest);
+                        } else {
+                            return "grey";
+                        }
+                    }
+                   
+                })
                 .attr("d", path2)
                 .on("mouseover", function(d) {
                     d3.select(this).style("opacity", 0.6)
