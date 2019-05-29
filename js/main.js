@@ -149,7 +149,9 @@ var newMap = function(data, selected_scenario) {
     parcel.exit().remove();
 }
 
-var volumes = d3.csv("./data/volume_final.csv")
+var volumes = d3.csv("./data/volumes_final.csv")
+var stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
+
 volumes.then(function(data) {
     plotVolume(data);
 });
@@ -174,8 +176,9 @@ var tooltipChart = d3.select("#chart").append("div")
     .style("opacity", 0);      
     
 function plotVolume(data) {
+    stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     chart.selectAll("rect")
-    .data(data.filter(d => d.scenario === selected_scenario))
+    .data(data.filter(d => d.scenario === selected_scenario && d.type === stocha_ws))
     .exit().remove();
 
     x.domain(data.map(function(d) { return d.period; }));
@@ -184,7 +187,7 @@ function plotVolume(data) {
             
     chart.selectAll("rect")
         // .exit().remove()
-        .data(data.filter(d => d.scenaros === selected_scenario))
+        .data(data.filter(d => d.scenaros === selected_scenario && d.type === stocha_ws))
         .enter().append("rect")
             .attr("class", "bar")
             .attr("x", d => x(d.period))
@@ -245,20 +248,27 @@ chart.append("text")
     .text("Volume cubic meters"); 
 
 
-d3.selectAll('input[name="scenario_type"]').on("change", function() {
+d3.selectAll('input[name="scenario_type"]').on("change", togliingChart); 
+d3.selectAll('input[name="stoch_ws"]').on("change", togliingChart); 
+
+function togliingChart() {
     var type = d3.select('input[name="scenario_type"]:checked').node().value;
+    var scen_type = d3.select("#scen_div");
+    // scen_type.classed("hidden", !scen_type.classed("hidden"));
     volumes.then(function(data) {
         clearChart()
         if (type === "allSenario") {
             plotAllScenarios(data);
+            scen_type.classed("hidden", true);
         } else {
             plotVolume(data);
+            scen_type.classed("hidden", false);
         }
     });
 
     forest.then(function(for_data) {
-         var alMapClass = d3.selectAll("#map .multiple");
-         if (alMapClass) alMapClass.remove();
+        var alMapClass = d3.selectAll("#map .multiple");
+        if (alMapClass) alMapClass.remove();
         if (type === "allSenario") {
             plotManyMaps(for_data);
         } else {
@@ -267,9 +277,8 @@ d3.selectAll('input[name="scenario_type"]').on("change", function() {
             d3.select("#map .legend").style("right", "250px");
         }
     });
-    var scen_type = d3.select("#scen_div");
-    scen_type.classed("hidden", !scen_type.classed("hidden"));
-}); 
+    
+} 
 
 function plotAllMapsPeriod() {
     forest.then(function(data) {
@@ -323,7 +332,7 @@ gSimple.call(sliderSimple);
 var keysScen = scen_data.map(String);
 
 function plotAllScenarios(data) {
-    
+    stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     x0 = d3.scaleBand()
         .domain(data.map(d => d.period))
         .rangeRound([0, width/2])
@@ -346,7 +355,7 @@ function plotAllScenarios(data) {
     chart.append("g")
     .attr("opacity", 0)
     .selectAll("g")
-    .data(data)
+    .data(data.filter(d => d.type === stocha_ws))
     .join("g")
         .attr("transform", d => `translate(${x0(d.period)},0)`)
     .selectAll("rect")
