@@ -87,7 +87,7 @@ var g = svg.append("g")
 var selected_scenario = "1";
 
 
-var forest = d3.json("./data/harvests1.json")
+var forest = d3.json("./data/harvests2.json")
 forest.then(function(data) {
     newMap(data, selected_scenario);
 });
@@ -107,7 +107,7 @@ function zoomHandler() {
 
 
 var newMap = function(data, selected_scenario) {
-    subData = data.features.filter(d => d.properties.scenario === selected_scenario);
+    subData = data.features.filter(d => d.properties.scenario === selected_scenario && d.properties.type === stocha_ws);
 
    var parcel =  g.selectAll("path")
         .data(subData);
@@ -449,7 +449,8 @@ function plotManyMaps(data) {
         path2 = d3.geoPath()
             .projection(projection2);
 
-        subData = data.features.filter(d => d.properties.scenario ===  keysScen[i]);
+        subData = data.features.filter(d => d.properties.scenario ===  keysScen[i] 
+            && d.properties.type === stocha_ws);
         smallWidth = width/4
         smallHeight = 1.2*height/2
         ggg = d3.select("#map")
