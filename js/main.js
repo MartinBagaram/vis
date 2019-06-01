@@ -32,7 +32,7 @@ var legend = d3.select("#map").append("svg")
     .attr("height", 200)
     .style("position", "absolute")
     .style("top", height  - 50 -margin.top + "px")
-    .style("right", "250px")
+    .style("right", "30%")
     .selectAll("g")
     .data(color.domain().slice())
     .enter()
@@ -394,7 +394,7 @@ function plotAllScenarios(data) {
         .duration(1500)
         .ease(d3.easeLinear)
         .delay(function(d,i){ return  500 + 1000 * i; })
-        .style("opacity","1");
+        .style("opacity", 1);
 
     // update x-axis
     chart.append("g")
@@ -404,7 +404,6 @@ function plotAllScenarios(data) {
     // add the y Axis
     chart.append("g")
         .call(d3.axisLeft(y));
-            // .attr("font-weight", "bold");
 
       //Legend
     var legend2 = svg.selectAll(".legend")
@@ -412,7 +411,7 @@ function plotAllScenarios(data) {
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", function(d,i) { return "translate(0," + i * 20 + ")"; })
-        .style("opacity","0");
+        .style("opacity", 0);
 
         legend2.append("rect")
         .attr("x", width/2+margin.left)
@@ -446,17 +445,17 @@ function clearChart() {
 // console.log(keysScen);
 function plotManyMaps(data) {
     for (var i = 0; i < keysScen.length; i++) {
+        smallWidth = width/4
+        smallHeight = 1.2*height/2
         projection2 = d3.geoMercator()
             .scale(200000)
             .center([-78.975035, 41.315089])  // centers map at given coordinates
-            .translate([width / 2, height / 2])
+            .translate([2*smallWidth, height / 2])
         path2 = d3.geoPath()
             .projection(projection2);
 
         subData = data.features.filter(d => d.properties.scenario ===  keysScen[i] 
             && d.properties.type === stocha_ws);
-        smallWidth = width/4
-        smallHeight = 1.2*height/2
         ggg = d3.select("#map")
             .append("svg")
             .attr("height", smallHeight)
