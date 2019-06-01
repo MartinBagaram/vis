@@ -26,7 +26,7 @@
                     <a class="nav-link" href="#exampleModalLong" data-toggle="modal">Help</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Home</a>
+                    <a class="nav-link" href="#">Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Projects</a>
@@ -51,10 +51,11 @@
 
 <!-- Second row -->
         <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 col-xl-3">
+            <div class="col-md-5 col-lg-4 col-xl-3">
                 <form id="all_single">
                     <input type="radio" name="scenario_type" value="allSenario"> All Scenarios</input>
                     <input type="radio" name="scenario_type" value="singleScen" checked> Single Scenario</input>
+                    
                     <div id="scen_div">
                         Select Scenario 
                         <div id="slider-simple"></div>
@@ -66,14 +67,34 @@
                 </form>
             </div>
 
-            <!-- <div class="col-md-6 col-lg-6 col-xl-6">
-            One of three columns
-            </div> -->
+            <div class="col-md-2 col-lg-2 col-xl-4">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="compareCheckBox">
+                    <label class="custom-control-label" for="compareCheckBox">Compare two scenarios</label>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center" id="leftRigtDropDowns">
+            <div class="col-3">
+                Scenario 1 <select id="left_option"></select>
+            </div>
+            <div class="col-3">
+                Scenario 2 <select id="right_option"></select>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-5 col-xl-5" id="left_map">
+            <!-- left map -->
+            </div>
+            <div class="col-md-5 col-lg-5 col-xl-5" id="right_map">
+                <!-- rirght map -->
+            </div>
         </div>
 
         <div class="row justify-content-center">
             <div class="col-md-12 col-lg-10 col-xl-8" id="parralel_chart">
-            <!-- One of three columns -->
+            <!-- Parrallel coordinates -->
             </div>
             
         </div>
@@ -88,7 +109,7 @@
               </button>
             </div>
             <div class="modal-body">
-              This is tool is designed to help understand what is stochatistc programming. It focusses on 
+              This is tool is designed to help understand what is stochastic programming. It focusses on 
               spatial explicit stochastic programming where the decision variables are binary. 
               This tool tries to display the solution for a forest management planning under climate change uncertainty.
               <p> Under climate change it is assumed that forest growth and yield will be different from the historical data.

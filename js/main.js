@@ -57,7 +57,7 @@ legend.append("rect")
             activeFilterPeriod = true;
         }
         type = d3.select('input[name="scenario_type"]:checked').node().value;
-        console.log(type);
+        updateLeftRigh();
         if (type === "allSenario") {
             plotAllMapsPeriod();
         } else {
@@ -254,9 +254,9 @@ d3.selectAll('input[name="stoch_ws"]').on("change", togliingChart);
 function togliingChart() {
     var type = d3.select('input[name="scenario_type"]:checked').node().value;
     var scen_type = d3.select("#scen_div");
+    clearChart()
     // scen_type.classed("hidden", !scen_type.classed("hidden"));
     volumes.then(function(data) {
-        clearChart()
         if (type === "allSenario") {
             plotAllScenarios(data);
             scen_type.classed("hidden", true);
@@ -353,16 +353,16 @@ function plotAllScenarios(data) {
     
     var svg = d3.select("#chart svg");
     chart.append("g")
-    .attr("opacity", 0)
-    .selectAll("g")
-    .data(data.filter(d => d.type === stocha_ws))
-    .join("g")
-        .attr("transform", d => `translate(${x0(d.period)},0)`)
-    .selectAll("rect")
-    .data(function(d) {
-       dt = grp.map(key => ({key:d.scenaros, val: d.value}));
-       return dt;
-    })
+        .attr("opacity", 0)
+        .selectAll("g")
+        .data(data.filter(d => d.type === stocha_ws))
+        .join("g")
+            .attr("transform", d => `translate(${x0(d.period)},0)`)
+        .selectAll("rect")
+        .data(function(d) {
+        dt = grp.map(key => ({key:d.scenaros, val: d.value}));
+        return dt;
+        })
     .join("rect")
         .attr("class", "bar")
       .attr("x", d => x1(d.key))
@@ -395,12 +395,12 @@ function plotAllScenarios(data) {
     // update x-axis
     chart.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x0))
-            .attr("font-weight", "bold");
+        .call(d3.axisBottom(x0));
+            // .attr("font-weight", "bold");
     // add the y Axis
     chart.append("g")
-        .call(d3.axisLeft(y))
-            .attr("font-weight", "bold");
+        .call(d3.axisLeft(y));
+            // .attr("font-weight", "bold");
 
       //Legend
     var legend2 = svg.selectAll(".legend")
@@ -508,4 +508,122 @@ function plotManyMaps(data) {
             gg.exit().remove();
     }
     
+}
+
+updateLeftRigh();
+d3.select('#compareCheckBox').on("change", updateLeftRigh);
+
+function updateLeftRigh() {
+    first = null, second = null;
+    state = d3.select("#compareCheckBox");
+    if (!state.property("checked")) {
+        d3.select('#leftRigtDropDowns').attr("hidden", true);
+        d3.select('#left_map').attr("hidden", true);
+        d3.select('#right_map').attr("hidden", true);;
+    } else {
+        d3.select('#leftRigtDropDowns').attr("hidden", null);
+        d3.select('#left_map').attr("hidden", null);
+        d3.select('#right_map').attr("hidden", null);
+        first = d3.select("#left_option").property("value");
+        second = d3.select("#right_option").property("value");
+        l_opt =  document.getElementById("left_option");
+        r_opt =  document.getElementById("right_option");
+        if (first === "") {
+            for (item in keysScen) {
+                l_opt.add(new Option(keysScen[item]));
+            };
+ 
+        }
+    
+        if (second === "") {
+            for (item in keysScen) {
+                // if (keysScen[item] !== first) {
+                    r_opt.add(new Option(keysScen[item]));
+                // }
+            };
+        }
+        mapLeft();
+        mapRight();
+        d3.select("#left_option").on("change", mapLeft);
+        d3.select("#right_option").on("change", mapRight);
+    }
+        
+}
+
+function mapLeft() {
+    forest.then(function(data) {
+        mapCompare(data, "left");
+    });
+}
+
+function mapRight() {
+    forest.then(function(data) {
+        mapCompare(data, "right");
+    });
+}
+
+function mapCompare(data, which) {
+        if (which === "left") {
+            scene = d3.select("#left_option").property("value");
+            map = d3.select("#left_map");
+        } else {
+            scene = d3.select("#right_option").property("value");
+            map = d3.select("#right_map")
+        }
+        subData = data.features.filter(d => d.properties.scenario ===  scene);
+        smallWidth = width/4
+        smallHeight = 1.2*height/2
+        ggg = map
+            .append("svg")
+            .attr("height", height)
+            .attr("width", width);
+            // .attr("class", "multiple");
+        
+        ggg.style("left", 20 +"px")
+            .style("top", 20 + "px")
+            .style("position", "absolute");
+        gg = ggg.append("g")
+            .call(d3.zoom()
+            .scaleExtent([1,100])
+            .on("zoom", zoomHandler));
+
+        parcel = gg.selectAll("path")
+                .data(subData);
+                parcel.enter()
+                .append("path")
+                .merge(parcel)
+                .style("stroke", "#fff")
+                .style("stroke-width", "1")
+                .style("fill",  function(d) {
+                    if (!activeFilterPeriod) {
+                        return color(d.properties.harvest);
+                    } else {
+                        if (d.properties.harvest === filterPeriod) {
+                            return color(d.properties.harvest);
+                        } else {
+                            return "grey";
+                        }
+                    }
+                   
+                })
+                .attr("d", path)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("opacity", 0.6)
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html("Period: " + d.properties.harvest + 
+                        "<br>Scenario: " + d.properties.scenario +
+                        "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
+                        .style("left", (d3.event.pageX - $(window).width()/2 + offset + margin.left) + "px")
+                        .style("top", (d3.event.pageY - 10) + "px");
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("opacity", 1)
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+            d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
+            gg.exit().remove();
 }
