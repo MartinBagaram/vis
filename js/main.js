@@ -82,7 +82,7 @@ var g = svg.append("g")
     .call(d3.zoom()
             .scaleExtent([1,100])
             .on("zoom", zoomHandler)
-    );
+    ).append("g");
 
 var selected_scenario = "1";
 
