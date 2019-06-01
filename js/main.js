@@ -565,6 +565,14 @@ function mapRight() {
     });
 }
 
+var projection3 = d3.geoMercator()
+    .scale(360000)
+    .center([-79.01735, 41.3303800])  // centers map at given coordinates
+    .translate([offset + width / 2, height / 2])
+
+var path3 = d3.geoPath()
+    .projection(projection3);
+
 function mapCompare(data, which) {
     stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     if (which === "left") {
@@ -576,8 +584,7 @@ function mapCompare(data, which) {
     }
     subData = data.features.filter(d => d.properties.scenario ===  scene
         && d.properties.type === stocha_ws);
-    smallWidth = width/4
-    smallHeight = 1.2*height/2
+
     ggg = map
         .append("svg")
         .attr("height", height)
@@ -585,7 +592,7 @@ function mapCompare(data, which) {
         // .attr("class", "multiple");
 
     ggg.style("left", 20 +"px")
-        .style("top", 20 + "px")
+        .style("top", 0 + "px")
         .style("position", "absolute");
     gg = ggg.append("g")
         .call(d3.zoom()
@@ -610,7 +617,7 @@ function mapCompare(data, which) {
                 }
                 
             })
-            .attr("d", path)
+            .attr("d", path3)
             .on("mouseover", function(d) {
                 d3.select(this).style("opacity", 0.6)
                 tooltip.transition()

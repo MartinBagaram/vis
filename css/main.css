@@ -53,3 +53,18 @@ div.tooltipChart {
 .hidden{
   display: none;
 }
+
+#leftRigtDropDowns{
+  padding-top: 2em;
+}
+#scen_div {
+  text-align: center;
+  margin-bottom: 2em;
+}
+#slider-simple {
+  margin-bottom: -2em;
+}
+
+#first_row {
+  margin-bottom: 2em;
+}
