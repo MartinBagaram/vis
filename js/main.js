@@ -4,7 +4,7 @@ var margin = {top: 30, right: 80, bottom: 50, left: 80};
 
 var projection = d3.geoMercator()
     .scale(400000)
-    .center([-79.025235, 41.3299])  // centers map at given coordinates
+    .center([-79.025235, 41.333800])  // centers map at given coordinates
     .translate([offset + width / 2, height / 2])
 
 var path = d3.geoPath()
@@ -31,7 +31,7 @@ var legend = d3.select("#map").append("svg")
     .attr("width", 140)
     .attr("height", 200)
     .style("position", "absolute")
-    .style("top", "50px")
+    .style("top", height  - 50 -margin.top + "px")
     .style("right", "250px")
     .selectAll("g")
     .data(color.domain().slice())
@@ -107,7 +107,8 @@ function zoomHandler() {
 
 
 var newMap = function(data, selected_scenario) {
-    subData = data.features.filter(d => d.properties.scenario === selected_scenario && d.properties.type === stocha_ws);
+    subData = data.features.filter(d => d.properties.scenario === selected_scenario 
+        && d.properties.type === stocha_ws);
 
    var parcel =  g.selectAll("path")
         .data(subData);
@@ -178,7 +179,8 @@ var tooltipChart = d3.select("#chart").append("div")
 function plotVolume(data) {
     stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     chart.selectAll("rect")
-    .data(data.filter(d => d.scenario === selected_scenario && d.type === stocha_ws))
+    .data(data.filter(d => d.scenario === selected_scenario 
+        && d.type === stocha_ws))
     .exit().remove();
 
     x.domain(data.map(function(d) { return d.period; }));
@@ -187,7 +189,8 @@ function plotVolume(data) {
             
     chart.selectAll("rect")
         // .exit().remove()
-        .data(data.filter(d => d.scenaros === selected_scenario && d.type === stocha_ws))
+        .data(data.filter(d => d.scenaros === selected_scenario 
+            && d.type === stocha_ws))
         .enter().append("rect")
             .attr("class", "bar")
             .attr("x", d => x(d.period))
@@ -255,6 +258,7 @@ function togliingChart() {
     var type = d3.select('input[name="scenario_type"]:checked').node().value;
     var scen_type = d3.select("#scen_div");
     clearChart()
+    updateLeftRigh();
     // scen_type.classed("hidden", !scen_type.classed("hidden"));
     volumes.then(function(data) {
         if (type === "allSenario") {
@@ -464,8 +468,7 @@ function plotManyMaps(data) {
             .style("position", "absolute");
         gg = ggg.append("g")
             .call(d3.zoom()
-            .scaleExtent([1,100])
-            .on("zoom", zoomHandler));
+            .scaleExtent([1,100]));
 
         parcel = gg.selectAll("path")
                 .data(subData);
@@ -504,7 +507,7 @@ function plotManyMaps(data) {
                         .duration(500)
                         .style("opacity", 0);
                 });
-            // d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
+            d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
             gg.exit().remove();
     }
     
@@ -563,67 +566,68 @@ function mapRight() {
 }
 
 function mapCompare(data, which) {
-        if (which === "left") {
-            scene = d3.select("#left_option").property("value");
-            map = d3.select("#left_map");
-        } else {
-            scene = d3.select("#right_option").property("value");
-            map = d3.select("#right_map")
-        }
-        subData = data.features.filter(d => d.properties.scenario ===  scene);
-        smallWidth = width/4
-        smallHeight = 1.2*height/2
-        ggg = map
-            .append("svg")
-            .attr("height", height)
-            .attr("width", width);
-            // .attr("class", "multiple");
-        
-        ggg.style("left", 20 +"px")
-            .style("top", 20 + "px")
-            .style("position", "absolute");
-        gg = ggg.append("g")
-            .call(d3.zoom()
-            .scaleExtent([1,100])
-            .on("zoom", zoomHandler));
+    stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
+    if (which === "left") {
+        scene = d3.select("#left_option").property("value");
+        map = d3.select("#left_map");
+    } else {
+        scene = d3.select("#right_option").property("value");
+        map = d3.select("#right_map")
+    }
+    subData = data.features.filter(d => d.properties.scenario ===  scene
+        && d.properties.type === stocha_ws);
+    smallWidth = width/4
+    smallHeight = 1.2*height/2
+    ggg = map
+        .append("svg")
+        .attr("height", height)
+        .attr("width", width);
+        // .attr("class", "multiple");
 
-        parcel = gg.selectAll("path")
-                .data(subData);
-                parcel.enter()
-                .append("path")
-                .merge(parcel)
-                .style("stroke", "#fff")
-                .style("stroke-width", "1")
-                .style("fill",  function(d) {
-                    if (!activeFilterPeriod) {
+    ggg.style("left", 20 +"px")
+        .style("top", 20 + "px")
+        .style("position", "absolute");
+    gg = ggg.append("g")
+        .call(d3.zoom()
+        .scaleExtent([1,100]));
+
+    parcel = gg.selectAll("path")
+            .data(subData);
+            parcel.enter()
+            .append("path")
+            .merge(parcel)
+            .style("stroke", "#fff")
+            .style("stroke-width", "1")
+            .style("fill",  function(d) {
+                if (!activeFilterPeriod) {
+                    return color(d.properties.harvest);
+                } else {
+                    if (d.properties.harvest === filterPeriod) {
                         return color(d.properties.harvest);
                     } else {
-                        if (d.properties.harvest === filterPeriod) {
-                            return color(d.properties.harvest);
-                        } else {
-                            return "grey";
-                        }
+                        return "grey";
                     }
-                   
-                })
-                .attr("d", path)
-                .on("mouseover", function(d) {
-                    d3.select(this).style("opacity", 0.6)
-                    tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html("Period: " + d.properties.harvest + 
-                        "<br>Scenario: " + d.properties.scenario +
-                        "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
-                        .style("left", (d3.event.pageX - $(window).width()/2 + offset + margin.left) + "px")
-                        .style("top", (d3.event.pageY - 10) + "px");
-                })
-                .on("mouseout", function(d) {
-                    d3.select(this).style("opacity", 1)
-                    tooltip.transition()
-                        .duration(500)
-                        .style("opacity", 0);
-                });
-            d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
-            gg.exit().remove();
+                }
+                
+            })
+            .attr("d", path)
+            .on("mouseover", function(d) {
+                d3.select(this).style("opacity", 0.6)
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html("Period: " + d.properties.harvest + 
+                    "<br>Scenario: " + d.properties.scenario +
+                    "<br>Area (ac): " + d3.format("(.2f")(d.properties.AREAAC))
+                    .style("left", (d3.event.pageX - $(window).width()/2 + offset + margin.left) + "px")
+                    .style("top", (d3.event.pageY - 10) + "px");
+            })
+            .on("mouseout", function(d) {
+                d3.select(this).style("opacity", 1)
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+        // d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
+        gg.exit().remove();
 }
