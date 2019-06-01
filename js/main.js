@@ -504,7 +504,7 @@ function plotManyMaps(data) {
                         .duration(500)
                         .style("opacity", 0);
                 });
-            d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
+            // d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
             gg.exit().remove();
     }
     
