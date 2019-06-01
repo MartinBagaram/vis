@@ -278,7 +278,7 @@ function togliingChart() {
         } else {
 
             newMap(for_data, selected_scenario);
-            d3.select("#map .legend").style("right", "250px");
+            d3.select("#map .legend").style("right", "30%");
         }
     });
     
@@ -442,7 +442,14 @@ function clearChart() {
     d3.selectAll("#map path").remove();
 }
 
-// console.log(keysScen);
+// function scale (scaleFactor,width,height) {
+//     return d3.geoTransform({
+//       point: function(x, y) {
+//         this.stream.point( (x - width/2) * scaleFactor + width/2 , (y - height/2) * scaleFactor + height/2);
+//       }
+//     });
+//   }
+
 function plotManyMaps(data) {
     for (var i = 0; i < keysScen.length; i++) {
         smallWidth = width/4
@@ -450,7 +457,7 @@ function plotManyMaps(data) {
         projection2 = d3.geoMercator()
             .scale(200000)
             .center([-78.975035, 41.315089])  // centers map at given coordinates
-            .translate([2*smallWidth, height / 2])
+            .translate([2*smallWidth-5, height / 2])
         path2 = d3.geoPath()
             .projection(projection2);
 
@@ -462,7 +469,7 @@ function plotManyMaps(data) {
             .attr("width", smallWidth)
             .attr("class", "multiple");
         
-        ggg.style("left", (i%4 * smallWidth) + 20 +"px")
+        ggg.style("left", (i%4 * 19) + 5 +"%")
             .style("top", Math.floor(i/4) * smallHeight + "px")
             .style("position", "absolute");
         gg = ggg.append("g")
