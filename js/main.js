@@ -457,7 +457,7 @@ function plotManyMaps(data) {
         projection2 = d3.geoMercator()
             .scale(200000)
             .center([-78.975035, 41.315089])  // centers map at given coordinates
-            .translate([2*smallWidth-5, height / 2])
+            .translate([2*smallWidth+25, height / 2])
         path2 = d3.geoPath()
             .projection(projection2);
 
