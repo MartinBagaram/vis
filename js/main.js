@@ -600,7 +600,7 @@ function mapCompare(data, which) {
         .append("svg")
         .attr("height", height)
         .attr("width", width);
-        // .attr("class", "multiple");
+        // .style("margin-bottom", "20px");
 
     ggg.style("left", 20 +"px")
         .style("top", 0 + "px")

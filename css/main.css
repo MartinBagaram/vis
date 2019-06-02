@@ -56,6 +56,7 @@ div.tooltipChart {
 
 #leftRigtDropDowns{
   padding-top: 2em;
+  /* margin-bottom: 3em; */
 }
 #scen_div {
   text-align: center;
@@ -67,4 +68,7 @@ div.tooltipChart {
 
 #first_row {
   margin-bottom: 2em;
+}
+#row_parallelChart {
+  margin-top: 3em;
 }
