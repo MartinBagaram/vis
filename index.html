@@ -22,6 +22,12 @@
     <!-- <div class="container"> -->
         <!-- <div class="row navbar"> -->
             <ul class="nav justify-content-end">
+                <!-- <li>
+                    <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="compareCheckBox">
+                            <label class="custom-control-label" for="compareCheckBox">Compare two scenarios</label>
+                    </div>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" href="#exampleModalLong" data-toggle="modal">Help</a>
                 </li>
@@ -74,33 +80,35 @@
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center" id="leftRigtDropDowns">
-            <div class="col-2">
-                Scenario 1 <select id="left_option"></select>
-            </div>
-            <div class="col-2">
-                
-            </div>
-            <div class="col-2">
-                Scenario 2 <select id="right_option"></select>
-            </div>
-        </div>
+        
 
         <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 col-xl-4 col-sm-6" id="left_map">
-            <!-- left map -->
-            </div>
-            <div class="col-md-6 col-lg-4 col-xl-4 col-sm-6" id="right_map">
-                <!-- rirght map -->
-            </div>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-md-12 col-lg-10 col-xl-8" id="parralel_chart">
+            <div class="col-md-12 col-lg-12 col-xl-12" id="parralel_chart">
             <!-- Parrallel coordinates -->
             </div>
             
         </div>
+
+        <div class="row justify-content-center" id="leftRigtDropDowns">
+                <div class="col-2">
+                    Scenario 1 <select id="left_option"></select>
+                </div>
+                <div class="col-2">
+                    
+                </div>
+                <div class="col-2">
+                    Scenario 2 <select id="right_option"></select>
+                </div>
+            </div>
+    
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5 col-xl-4 col-sm-6" id="left_map">
+                <!-- left map -->
+                </div>
+                <div class="col-md-6 col-lg-4 col-xl-4 col-sm-6" id="right_map">
+                    <!-- rirght map -->
+                </div>
+            </div>
         <!-- Modal -->
     <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -128,8 +136,9 @@
         </div>
       </div>
     <!-- </div> -->
-    <script type="text/javascript" src="./js/d3.legend.js"></script>
+    
     <script type="text/javascript" src="./js/main.js"></script>
+    <!-- <script type="text/javascript" src="./js/parallel.js"></script> -->
  </body>
  </html> 
 

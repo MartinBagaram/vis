@@ -252,7 +252,12 @@ chart.append("text")
 
 
 d3.selectAll('input[name="scenario_type"]').on("change", togliingChart); 
-d3.selectAll('input[name="stoch_ws"]').on("change", togliingChart); 
+d3.selectAll('input[name="stoch_ws"]').on("change", handleStochaSolution); 
+
+function handleStochaSolution() {
+    togliingChart();
+    plotParallelGraph();
+}
 
 function togliingChart() {
     var type = d3.select('input[name="scenario_type"]:checked').node().value;
@@ -644,3 +649,160 @@ function mapCompare(data, which) {
         // d3.select("#map .legend").style("right", "20px"); //adjusts the legend of the map
         gg.exit().remove();
 }
+
+
+
+var solutions = d3.csv("./data/solution_harvest_p.csv")
+var xp,
+    yp = {},
+    dragging = {};
+
+var line = d3.line(),
+    axis = d3.axisLeft(), // fix it later 
+    background,
+    foreground;
+
+var svgParallel = d3.select("#parralel_chart").append("svg")
+    .attr("width", width*1.8 + margin.right+margin.right)
+    .attr("height", height + margin.top+margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + 0 + "," + margin.top + ")")
+    .style("padding-bottom", "3em");
+
+ 
+plotParallelGraph();
+// For each dimension, I build a linear scale. I store all in a y object
+function plotParallelGraph() {
+    // stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
+    solutions.then(function(data) {
+    var dimensions = d3.keys(data[0]).filter(d => (d != "idd" && d != 'type'));
+    subData = data.filter(d => d.type === stocha_ws);
+    for (i in dimensions) {
+      name = dimensions[i];
+      yp[name] = d3.scaleLinear()
+        .domain( d3.extent(subData, function(d) { 
+          return +d[name]; }) )
+        .range([height, 0]);
+    }
+
+    // Add grey background lines for context.
+//   background = svg.append("g")
+//     .attr("class", "background")
+//     .selectAll("path")
+//     .data(subData)
+//     .enter().append("path")
+//     .attr("d", path);
+
+//     // Add blue foreground lines for focus.
+//   foreground = svg.append("g")
+//     .attr("class", "foreground")
+//     .selectAll("path")
+//     .data(subData)
+//     .enter().append("path")
+//     .attr("d", path);
+    // Build the X scale -> it find the best position for each Y axis
+    xp = d3.scalePoint()
+      .range([0, 2*width])
+      .padding(1)
+      .domain(dimensions);
+    // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+    function path(d) {
+      return d3.line()(dimensions.map(function(p) { 
+        return [xp(p), yp[p](d[p])]; 
+      }));
+    }
+    svgParallel.selectAll('path').remove();
+    // Draw the lines
+    svgParallel
+      .selectAll("myPath")
+      .data(subData)
+      .enter().append("path")
+      .attr("d",  path)
+      .style("fill", "none")
+      .style("stroke", "#69b3a2")
+      .style("opacity", 0.5)
+      .on("mouseover", function(d) {
+          d3.select(this)
+            .style("stroke", "blue")
+            .style("stroke-width", 5);
+      })
+      .on("mouseout", function(d) {
+          d3.select(this)
+            .style("stroke", "#69b3a2")
+            .style("stroke-width", 1);
+      });
+  
+    // Draw the axis:
+    svgParallel.selectAll("myAxis")
+      // For each dimension of the dataset I add a 'g' element:
+      .data(dimensions).enter()
+      .append("g")
+      // I translate this element to its right position on the x axis
+      .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
+      // And I build the axis with the call function
+      .each(function(d) { 
+        d3.select(this)
+        .call(d3.axisLeft()
+          .scale(yp[d]).ticks(6)); })
+      // Add axis title
+      .append("text")
+        .style("text-anchor", "middle")
+        .attr("y", -9)
+        .text(function(d) { return 'Scenario ' +d; })
+        .style("fill", "black")
+  });
+
+  
+}
+
+
+
+
+
+
+// Add grey background lines for context.
+// var background = svgParallel.append("g")
+//     .attr("class", "background")
+//     .selectAll("path")
+//     .data(subsetData)
+//     .join().append("path")
+//     .attr("d", path);
+
+// Add blue foreground lines for focus.
+// var foreground = svgParallel.append("g")
+//     .attr("class", "foreground")
+//     .selectAll("path")
+//     .data(subsetData)
+//     .enter().append("path")
+//     .attr("d", path);
+
+// Add a group element for each dimension.
+// var gp = svgParallel.selectAll(".dimension")
+//     .data(keysScen) // fix later
+//     .enter().append("g")
+//     .attr("class", "dimension")
+//     .attr("transform", function(d) { return "translate(" + xp(d) + ")"; });
+//     // .call(d3.behavior.drag()
+    // .origin(function(d) { return {x: xp(d)}; })
+    // // .on("dragstart", function(d) {
+    //     dragging[d] = x(d);
+    //     // background.attr("visibility", "hidden");
+    // })
+    // .on("drag", function(d) {
+    //     dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+    //     // foreground.attr("d", path);
+    //     dimensions.sort(function(a, b) { return position(a) - position(b); });
+    //     x.domain(dimensions);
+    //     g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
+    // })
+    // .on("dragend", function(d) {
+    //     delete dragging[d];
+    //     transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+    //     transition(foreground).attr("d", path);
+    //     // background
+    //     //     .attr("d", path)
+    //     // .transition()
+    //     //     .delay(500)
+    //     //     .duration(0)
+    //     //     .attr("visibility", null);
+    // }));
