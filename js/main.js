@@ -660,22 +660,25 @@ var xp,
 var line = d3.line(),
     axis = d3.axisLeft(), // fix it later 
     background,
-    foreground;
+    foreground,
+    extents;
 
 var svgParallel = d3.select("#parralel_chart").append("svg")
-    .attr("width", width*1.8 + margin.right+margin.right)
+    .attr("width", width*1.6 + margin.right+margin.right)
     .attr("height", height + margin.top+margin.bottom)
   .append("g")
-    .attr("transform", "translate(" + 0 + "," + margin.top + ")")
+    .attr("transform", "translate(" + -margin.left + "," + margin.top + ")")
     .style("padding-bottom", "3em");
 
  
 plotParallelGraph();
+
 // For each dimension, I build a linear scale. I store all in a y object
 function plotParallelGraph() {
+    var dimensions
     // stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     solutions.then(function(data) {
-    var dimensions = d3.keys(data[0]).filter(d => (d != "idd" && d != 'type'));
+    dimensions = d3.keys(data[0]).filter(d => (d != "idd" && d != 'type'));
     subData = data.filter(d => d.type === stocha_ws);
     for (i in dimensions) {
       name = dimensions[i];
@@ -685,21 +688,6 @@ function plotParallelGraph() {
         .range([height, 0]);
     }
 
-    // Add grey background lines for context.
-//   background = svg.append("g")
-//     .attr("class", "background")
-//     .selectAll("path")
-//     .data(subData)
-//     .enter().append("path")
-//     .attr("d", path);
-
-//     // Add blue foreground lines for focus.
-//   foreground = svg.append("g")
-//     .attr("class", "foreground")
-//     .selectAll("path")
-//     .data(subData)
-//     .enter().append("path")
-//     .attr("d", path);
     // Build the X scale -> it find the best position for each Y axis
     xp = d3.scalePoint()
       .range([0, 2*width])
@@ -711,53 +699,175 @@ function plotParallelGraph() {
         return [xp(p), yp[p](d[p])]; 
       }));
     }
-    svgParallel.selectAll('path').remove();
-    // Draw the lines
-    svgParallel
-      .selectAll("myPath")
-      .data(subData)
-      .enter().append("path")
-      .attr("d",  path)
-      .style("fill", "none")
-      .style("stroke", "#69b3a2")
-      .style("opacity", 0.5)
-      .on("mouseover", function(d) {
-          d3.select(this)
-            .style("stroke", "blue")
-            .style("stroke-width", 5);
-      })
-      .on("mouseout", function(d) {
-          d3.select(this)
-            .style("stroke", "#69b3a2")
-            .style("stroke-width", 1);
-      });
+
+    svgParallel.selectAll('.background').remove();
+    svgParallel.selectAll('.foreground').remove();
+    svgParallel.selectAll('.dimension').remove();
+
+     // Add grey background lines for context.
+  background = svgParallel.append("g")
+    .attr("class", "background")
+    .selectAll("path")
+    .data(subData)
+    .enter().append("path")
+    .attr("d", path);
+
+  // Add blue foreground lines for focus.
+    foreground = svgParallel.append("g")
+        .attr("class", "foreground")
+        .selectAll("path")
+        .data(subData)
+        .enter().append("path")
+        .attr("d", path)
+        .style("fill", "none")
+        .style("stroke", "#69b3a2")
+        .style("stroke-width", 2)
+        .style("opacity", 0.5)
+        .on("mouseover", function(d) {
+            d3.select(this)
+                .style("stroke", "blue")
+                .style("stroke-width", 5);
+        })
+        .on("mouseout", function(d) {
+            d3.select(this)
+                .style("stroke", "#69b3a2")
+                .style("stroke-width", 2);
+        });
+
+        extents = dimensions.map(function(p) { return [0,0]; });
+    /////////////////////////////////////////////////////////////////////////////////////////
+    // svgParallel.selectAll('path').remove();
+    // // Draw the lines
+    // svgParallel
+    //   .selectAll("myPath")
+    //   .data(subData)
+    //   .enter().append("path")
+    //   .attr("d",  path)
+    //   .style("fill", "none")
+    //   .style("stroke", "#69b3a2")
+    //   .style("opacity", 0.5)
+    //   .on("mouseover", function(d) {
+    //       d3.select(this)
+    //         .style("stroke", "blue")
+    //         .style("stroke-width", 5);
+    //   })
+    //   .on("mouseout", function(d) {
+    //       d3.select(this)
+    //         .style("stroke", "#69b3a2")
+    //         .style("stroke-width", 1);
+    //   });
   
-    // Draw the axis:
-    svgParallel.selectAll("myAxis")
-      // For each dimension of the dataset I add a 'g' element:
-      .data(dimensions).enter()
-      .append("g")
-      // I translate this element to its right position on the x axis
-      .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
-      // And I build the axis with the call function
-      .each(function(d) { 
-        d3.select(this)
-        .call(d3.axisLeft()
-          .scale(yp[d]).ticks(6)); })
-      // Add axis title
-      .append("text")
+    // // Draw the axis:
+    // svgParallel.selectAll("myAxis")
+    //   // For each dimension of the dataset I add a 'g' element:
+    //   .data(dimensions).enter()
+    //   .append("g")
+    //   // I translate this element to its right position on the x axis
+    //   .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
+    //   // And I build the axis with the call function
+    //   .each(function(d) { 
+    //     d3.select(this)
+    //     .call(d3.axisLeft()
+    //       .scale(yp[d]).ticks(6)); })
+    //   // Add axis title
+    //   .append("text")
+    //     .style("text-anchor", "middle")
+    //     .attr("y", -9)
+    //     .text(function(d) { return 'Scenario ' +d; })
+    //     .style("fill", "black");
+
+
+        /////////////////////////////////////////////////////////////////////////
+    // Add a group element for each dimension.
+  var gp = svgParallel.selectAll(".dimension")
+  .data(dimensions)
+    .enter().append("g")
+    .attr("class", "dimension")
+    .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
+    .call(d3.drag()
+        .subject(function(d) { return {xp: xp(d)}; })
+        .on("start", function(d) {
+        dragging[d] = xp(d);
+        background.attr("visibility", "hidden");
+        })
+    .on("drag", function(d) {
+      dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+      foreground.attr("d", path);
+      dimensions.sort(function(a, b) { return position(a) - position(b); });
+      xp.domain(dimensions);
+      gp.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
+    })
+    .on("end", function(d) {
+      delete dragging[d];
+      transition(d3.select(this)).attr("transform", "translate(" + xp(d) + ")");
+      transition(foreground).attr("d", path);
+      background
+          .attr("d", path)
+        .transition()
+          .delay(500)
+          .duration(0)
+          .attr("visibility", null);
+    }));
+
+    // Add an axis and title.
+    gp.append("g")
+        .attr("class", "axis")
+        .each(function(d) { 
+            d3.select(this)
+            .call(d3.axisLeft()
+            .scale(yp[d])
+            .ticks(6)); })
+        .append("text")
         .style("text-anchor", "middle")
         .attr("y", -9)
-        .text(function(d) { return 'Scenario ' +d; })
-        .style("fill", "black")
-  });
+        .text(function(d) { return "scenario " +d; })
+        .style("fill", "black");
 
-  
+// Add and store a brush for each axis.
+gp.append("g")
+  .attr("class", "brush")
+  .each(function(d) {
+    d3.select(this)
+        .call(yp[d].brush = d3.brushY().extent([[-8,0], [8,height]]).on("start", brushstart).on("brush", brushParallel));
+  })
+.selectAll("rect")
+  .attr("x", -8)
+  .attr("width", 16);
+});
+
+function position(d) {
+    var v = dragging[d];
+    return v == null ? xp(d) : v;
 }
 
+function transition(g) {
+return g.transition().duration(500);
+}
+
+function brushstart() {
+    d3.event.sourceEvent.stopPropagation();
+  }
+  
+  // Handles a brush event, toggling the display of foreground lines.
+  function brushParallel() {
+    for (var i = 0; i < dimensions.length; ++i){
+        if (d3.event.target === yp[dimensions[i]].brush) {
+              extents[i] = d3.event.selection.map(yp[dimensions[i]].invert, yp[dimensions[i]]);
+              }
+    }
+    foreground.style("display", function(d) {
+            return dimensions.every(function(p, i) {
+                if(extents[i][0] === 0 && extents[i][0] === 0) {
+                    return true;
+                }
+            return extents[i][1] <= d[p] && d[p] <= extents[i][0];
+            }) ? null : "none";
+        }); 
+    }
 
 
 
+}
 
 
 // Add grey background lines for context.
