@@ -734,53 +734,10 @@ function plotParallelGraph() {
                 .style("stroke-width", 2);
         });
 
-        extents = dimensions.map(function(p) { return [0,0]; });
-    /////////////////////////////////////////////////////////////////////////////////////////
-    // svgParallel.selectAll('path').remove();
-    // // Draw the lines
-    // svgParallel
-    //   .selectAll("myPath")
-    //   .data(subData)
-    //   .enter().append("path")
-    //   .attr("d",  path)
-    //   .style("fill", "none")
-    //   .style("stroke", "#69b3a2")
-    //   .style("opacity", 0.5)
-    //   .on("mouseover", function(d) {
-    //       d3.select(this)
-    //         .style("stroke", "blue")
-    //         .style("stroke-width", 5);
-    //   })
-    //   .on("mouseout", function(d) {
-    //       d3.select(this)
-    //         .style("stroke", "#69b3a2")
-    //         .style("stroke-width", 1);
-    //   });
-  
-    // // Draw the axis:
-    // svgParallel.selectAll("myAxis")
-    //   // For each dimension of the dataset I add a 'g' element:
-    //   .data(dimensions).enter()
-    //   .append("g")
-    //   // I translate this element to its right position on the x axis
-    //   .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
-    //   // And I build the axis with the call function
-    //   .each(function(d) { 
-    //     d3.select(this)
-    //     .call(d3.axisLeft()
-    //       .scale(yp[d]).ticks(6)); })
-    //   // Add axis title
-    //   .append("text")
-    //     .style("text-anchor", "middle")
-    //     .attr("y", -9)
-    //     .text(function(d) { return 'Scenario ' +d; })
-    //     .style("fill", "black");
-
-
-        /////////////////////////////////////////////////////////////////////////
+    extents = dimensions.map(function(p) { return [0,0]; });
     // Add a group element for each dimension.
   var gp = svgParallel.selectAll(".dimension")
-  .data(dimensions)
+    .data(dimensions)
     .enter().append("g")
     .attr("class", "dimension")
     .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
@@ -868,51 +825,3 @@ function brushstart() {
 
 
 }
-
-
-// Add grey background lines for context.
-// var background = svgParallel.append("g")
-//     .attr("class", "background")
-//     .selectAll("path")
-//     .data(subsetData)
-//     .join().append("path")
-//     .attr("d", path);
-
-// Add blue foreground lines for focus.
-// var foreground = svgParallel.append("g")
-//     .attr("class", "foreground")
-//     .selectAll("path")
-//     .data(subsetData)
-//     .enter().append("path")
-//     .attr("d", path);
-
-// Add a group element for each dimension.
-// var gp = svgParallel.selectAll(".dimension")
-//     .data(keysScen) // fix later
-//     .enter().append("g")
-//     .attr("class", "dimension")
-//     .attr("transform", function(d) { return "translate(" + xp(d) + ")"; });
-//     // .call(d3.behavior.drag()
-    // .origin(function(d) { return {x: xp(d)}; })
-    // // .on("dragstart", function(d) {
-    //     dragging[d] = x(d);
-    //     // background.attr("visibility", "hidden");
-    // })
-    // .on("drag", function(d) {
-    //     dragging[d] = Math.min(width, Math.max(0, d3.event.x));
-    //     // foreground.attr("d", path);
-    //     dimensions.sort(function(a, b) { return position(a) - position(b); });
-    //     x.domain(dimensions);
-    //     g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
-    // })
-    // .on("dragend", function(d) {
-    //     delete dragging[d];
-    //     transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-    //     transition(foreground).attr("d", path);
-    //     // background
-    //     //     .attr("d", path)
-    //     // .transition()
-    //     //     .delay(500)
-    //     //     .duration(0)
-    //     //     .attr("visibility", null);
-    // }));

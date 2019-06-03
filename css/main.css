@@ -68,6 +68,7 @@ div.tooltipChart {
 
 #first_row {
   margin-bottom: 2em;
+  margin-top: 5em;
 }
 #row_parallelChart {
   margin-top: 3em;
@@ -100,4 +101,13 @@ div.tooltipChart {
 .axis text {
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
   cursor: move;
+}
+
+#compare_nav {
+  margin-left: 5em;
+  top:.6em;
+}
+
+.navbar {
+  height: 8%;
 }
