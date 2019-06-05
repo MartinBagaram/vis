@@ -459,7 +459,7 @@ function plotManyMaps(data) {
     for (var i = 0; i < keysScen.length; i++) {
         smallWidth = width/4
         smallHeight = 1.2*height/2
-        projection2 = d3.geoMercator().fitSize([smallWidth, smallHeight], forest);
+        projection2 = d3.geoMercator().fitSize([smallWidth, smallHeight], data);
             // .scale(200000)
             // .center([-78.975035, 41.315089])  // centers map at given coordinates
             // .translate([2*smallWidth+25, height / 2])
@@ -576,7 +576,10 @@ function mapRight() {
     });
 }
 
-var projection3 = d3.geoMercator().fitSize([width, height], forest);
+
+
+function mapCompare(data, which) {
+    var projection3 = d3.geoMercator().fitSize([width, height], data);
     // .scale(360000)
     // .center([-79.01735, 41.3303800])  // centers map at given coordinates
     // .translate([offset + width / 2, height / 2])
@@ -584,7 +587,6 @@ var projection3 = d3.geoMercator().fitSize([width, height], forest);
 var path3 = d3.geoPath()
     .projection(projection3);
 
-function mapCompare(data, which) {
     stocha_ws = d3.select('input[name="stoch_ws"]:checked').node().value;
     if (which === "left") {
         scene = d3.select("#left_option").property("value");
