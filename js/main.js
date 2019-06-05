@@ -182,7 +182,9 @@ function plotVolume(data) {
     .data(data.filter(d => d.scenario === selected_scenario 
         && d.type === stocha_ws))
     .exit().remove();
-
+    
+    chart.selectAll("g").remove();
+    
     x.domain(data.map(function(d) { return d.period; }));
     y.domain([0, d3.max(data, function(d) { return d.value; })]);
     
