@@ -459,10 +459,10 @@ function plotManyMaps(data) {
     for (var i = 0; i < keysScen.length; i++) {
         smallWidth = width/4
         smallHeight = 1.2*height/2
-        projection2 = d3.geoMercator()
-            .scale(200000)
-            .center([-78.975035, 41.315089])  // centers map at given coordinates
-            .translate([2*smallWidth+25, height / 2])
+        projection2 = d3.geoMercator().fitSize([smallWidth, smallHeight], forest);
+            // .scale(200000)
+            // .center([-78.975035, 41.315089])  // centers map at given coordinates
+            // .translate([2*smallWidth+25, height / 2])
         path2 = d3.geoPath()
             .projection(projection2);
 
@@ -576,10 +576,10 @@ function mapRight() {
     });
 }
 
-var projection3 = d3.geoMercator()
-    .scale(360000)
-    .center([-79.01735, 41.3303800])  // centers map at given coordinates
-    .translate([offset + width / 2, height / 2])
+var projection3 = d3.geoMercator().fitSize([width, height], forest);
+    // .scale(360000)
+    // .center([-79.01735, 41.3303800])  // centers map at given coordinates
+    // .translate([offset + width / 2, height / 2])
 
 var path3 = d3.geoPath()
     .projection(projection3);
@@ -741,30 +741,31 @@ function plotParallelGraph() {
     .enter().append("g")
     .attr("class", "dimension")
     .attr("transform", function(d) { return "translate(" + xp(d) + ")"; })
-    .call(d3.drag()
-        .subject(function(d) { return {xp: xp(d)}; })
-        .on("start", function(d) {
-        dragging[d] = xp(d);
-        background.attr("visibility", "hidden");
+    .call(
+        d3.drag()
+            .subject(function(d) { return {xp: xp(d)}; })
+            .on("start", function(d) {
+            dragging[d] = xp(d);
+            background.attr("visibility", "hidden");
+            })
+        .on("drag", function(d) {
+        dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+        foreground.attr("d", path);
+        dimensions.sort(function(a, b) { return position(a) - position(b); });
+        xp.domain(dimensions);
+        gp.attr("transform", function(d) { return "translate(" + position(d) + ")"; });
         })
-    .on("drag", function(d) {
-      dragging[d] = Math.min(width, Math.max(0, d3.event.x));
-      foreground.attr("d", path);
-      dimensions.sort(function(a, b) { return position(a) - position(b); });
-      xp.domain(dimensions);
-      gp.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
-    })
-    .on("end", function(d) {
-      delete dragging[d];
-      transition(d3.select(this)).attr("transform", "translate(" + xp(d) + ")");
-      transition(foreground).attr("d", path);
-      background
-          .attr("d", path)
-        .transition()
-          .delay(500)
-          .duration(0)
-          .attr("visibility", null);
-    }));
+        .on("end", function(d) {
+        delete dragging[d];
+        transition(d3.select(this)).attr("transform", "translate(" + xp(d) + ")");
+        transition(foreground).attr("d", path);
+        background
+            .attr("d", path)
+            .transition()
+            .delay(500)
+            .duration(0)
+            .attr("visibility", null);
+        }));
 
     // Add an axis and title.
     gp.append("g")
@@ -798,7 +799,7 @@ function position(d) {
 }
 
 function transition(g) {
-return g.transition().duration(500);
+    return g.transition().duration(500);
 }
 
 function brushstart() {
@@ -814,7 +815,7 @@ function brushstart() {
     }
     foreground.style("display", function(d) {
             return dimensions.every(function(p, i) {
-                if(extents[i][0] === 0 && extents[i][0] === 0) {
+                if(extents[i][0] === 0 && extents[i][1] === 0) {
                     return true;
                 }
             return extents[i][1] <= d[p] && d[p] <= extents[i][0];
