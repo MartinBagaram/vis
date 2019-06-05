@@ -457,8 +457,8 @@ function clearChart() {
 
 function plotManyMaps(data) {
     for (var i = 0; i < keysScen.length; i++) {
-        smallWidth = width/4
-        smallHeight = 1.2*height/2
+        smallWidth = .8*width/4
+        smallHeight = 1.1*height/2
         projection2 = d3.geoMercator().fitSize([smallWidth, smallHeight], data);
             // .scale(200000)
             // .center([-78.975035, 41.315089])  // centers map at given coordinates
@@ -474,7 +474,7 @@ function plotManyMaps(data) {
             .attr("width", smallWidth)
             .attr("class", "multiple");
         
-        ggg.style("left", (i%4 * 19) + 5 +"%")
+        ggg.style("left", (i%4 * 18) + 6 +"%")
             .style("top", Math.floor(i/4) * smallHeight + "px")
             .style("position", "absolute");
         gg = ggg.append("g")
@@ -604,8 +604,8 @@ var path3 = d3.geoPath()
         .attr("width", width);
         // .style("margin-bottom", "20px");
 
-    ggg.style("left", 20 +"px")
-        .style("top", 0 + "px")
+    ggg.style("left", 0 +"px")
+        .style("top", 10 + "px")
         .style("position", "absolute");
     gg = ggg.append("g")
         .call(d3.zoom()
